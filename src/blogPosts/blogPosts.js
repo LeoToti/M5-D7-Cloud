@@ -9,6 +9,7 @@ import { validationResult } from "express-validator"
 import multer from "multer"
 import fs from "fs-extra"
 import { getBlogPosts, writeBlogs, writeBlogCovers } from "../helpers/files.js"
+import { generatePDFStream } from "../pdf.js"
 
 const { readJSON, writeJSON, writeFile, createReadStream } = fs
 
@@ -31,6 +32,17 @@ router.get("/", async (req, res, next) => {
         next(error)
     }
 })
+
+router.get("/pdfDownload", async (req, res, next) => {
+    try {
+      const source = generatePDFStream()
+      const destination = res
+      res.setHeader("Content-Disposition", "attachment; filename=export.pdf")
+      pipeline(source, destination, err => next(err))
+    } catch (error) {
+      next(error)
+    }
+  })
 
 router.get("/:id", async (req, res) => {
     try {
